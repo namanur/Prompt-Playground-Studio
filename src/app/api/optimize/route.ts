@@ -222,7 +222,7 @@ async function generateWithRetry(
       lastError = error;
       
       if (error instanceof z.ZodError) {
-        console.warn(`Validation failed on attempt ${attempt + 1}:`, error.errors);
+        console.warn(`Validation failed on attempt ${attempt + 1}:`, error.format());
       } else if (error instanceof SyntaxError) {
         console.warn(`JSON parse failed on attempt ${attempt + 1}:`, error.message);
       } else {
