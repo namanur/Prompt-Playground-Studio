@@ -32,8 +32,13 @@ Given a candidate JSON (same schema), rescore 0–100.
 If < 92, return a REVISED, superior JSON in the same schema. No commentary.
 `;
 
-function ok(data: any, status = 200) { return NextResponse.json({ success: true, ...data }, { status }); }
-function fail(error: string, status = 500) { return NextResponse.json({ success: false, error }, { status }); }
+function ok(data: any, status = 200) { 
+  return NextResponse.json({ success: true, ...data }, { status }); 
+}
+
+function fail(error: string, status = 500) { 
+  return NextResponse.json({ success: false, error }, { status }); 
+}
 
 async function callLLM(messages: any[], temperature = 0.6) {
   const apiKey = process.env.OPENROUTER_API_KEY;
@@ -47,7 +52,6 @@ async function callLLM(messages: any[], temperature = 0.6) {
     headers: {
       "Authorization": `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      // These help OpenRouter route/attribute your traffic:
       "HTTP-Referer": referer,
       "X-Title": "Prompt Playground",
     },
@@ -103,7 +107,11 @@ Remember schema and scoring rules.`}
     ], 0.6);
 
     let candidate: any;
-    try { candidate = JSON.parse(genRaw); } catch { return fail("Model returned non-JSON content."); }
+    try { 
+      candidate = JSON.parse(genRaw); 
+    } catch { 
+      return fail("Model returned non-JSON content."); 
+    }
 
     // Pass B — Judge/Revise
     const judgedRaw = await callLLM([
@@ -112,10 +120,15 @@ Remember schema and scoring rules.`}
     ], 0.2);
 
     let result: any;
-    try { result = JSON.parse(judgedRaw); } catch { result = candidate; }
+    try { 
+      result = JSON.parse(judgedRaw); 
+    } catch { 
+      result = candidate; 
+    }
 
     // Minimal shape check
-    for (const k of ["final_prompt","subject","environment","style","lighting","camera","composition","postprocess","negatives","score"]) {
+    const requiredKeys = ["final_prompt","subject","environment","style","lighting","camera","composition","postprocess","negatives","score"];
+    for (const k of requiredKeys) {
       if (!(k in result)) return fail(`Missing key in result: ${k}`);
     }
 
