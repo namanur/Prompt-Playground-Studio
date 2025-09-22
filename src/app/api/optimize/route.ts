@@ -4,7 +4,7 @@ import { z } from "zod";
 export const runtime = "nodejs";
 
 const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = process.env.OPENROUTER_MODEL || "deepseek/deepseek-chat-v3.1";
+const DEFAULT_MODEL = process.env.OPENROUTER_MODEL || "deepseek/deepseek-chat";
 const APP_URL = process.env.OPENROUTER_APP_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 const PromptJSON = z.object({
@@ -68,7 +68,7 @@ async function callOpenRouter(messages: any[], model: string, temperature = 0.6)
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(\`OpenRouter error \${res.status}: \${text}\`);
+    throw new Error(`OpenRouter error ${res.status}: ${text}`);
   }
   const data = await res.json();
   return data.choices?.[0]?.message?.content ?? "{}";
@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
     const genRaw = await callOpenRouter(
       [
         { role: "system", content: SYSTEM_GEN },
-        { role: "user", content: \`User Prompt: \${prompt}\nAdditional Params: \${JSON.stringify(params)}\` },
+        { role: "user", content: `User Prompt: ${prompt}\nAdditional Params: ${JSON.stringify(params)}` },
       ],
       model,
       0.6
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
       return fail("Model returned non-JSON content");
     }
 
-    const result = PromptJSON.parse(parsed); // ✅ Zod v3 uses .issues (handled below)
+    const result = PromptJSON.parse(parsed);
 
     return ok({ success: true, result, output: result.final_prompt });
   } catch (error: any) {
